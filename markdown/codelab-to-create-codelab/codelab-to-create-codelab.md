@@ -20,7 +20,8 @@ We use the open-source [Google Codelabs Tools](https://github.com/googlecodelabs
 
 ### Workflow
 Below is the high level workflow on what we will do as part of this codelab
-[![Codelab Workflow Diagram](FlowDiagram.png)](FlowDiagram.png) <!-- Clickable image -->
+
+![Codelab Workflow Diagram](FlowDiagram.png) 
 
 ### Resources
 QNX Customized Claat Tool used in this codelab - [Github Repo ](https://github.com/qnx/tools) 
@@ -123,7 +124,7 @@ Inconsistencies or changes to other files will unfortunately result in a rejecte
     ```bash
     mkdir -p ./codelabs/markdown/<name-of-your-codelab>
     ```
-2. Create a New Folder and copy markdown-template.md into your newly created folder to  ensure the required tags are included.
+2. Copy `markdown-template.md` into your newly created folder to  ensure the required tags are included.
 
     The id tag must exactly match the .md filename for claat to work correctly.
 
@@ -141,9 +142,10 @@ Inconsistencies or changes to other files will unfortunately result in a rejecte
     
     ```
 
-3. Rename the markdown file as <name-of-your-codelab>
+3. Rename the markdown file as your `<name-of-your-codelab>.md`
 
-4. (Optional) Run claat to view your <name-of-your-codelab>.md file locally as html. Otherwise, skip to step 7
+
+4. (Optional) Run claat to view your `<name-of-your-codelab>.md` file locally as html. Otherwise, skip to step 7
 
     ```bash
     //cd out from ~./markdown/<name-of-your-codelab> folder to ~./codelabs
@@ -151,9 +153,12 @@ Inconsistencies or changes to other files will unfortunately result in a rejecte
     claat export -f html -o docs ./markdown/<name-of-your-codelab> folder/<name-of-your-codelab>.md
     
     ```
-5. You will see a similar output in terminal and a folder created with html file under ~./codelabs/docs
+5. You will see a similar output as below in terminal and a folder created same as `<name-of-your-codelab>` file under ~./codelabs/docs
 
-6. Now run claat serve to view the html locally at http://localhost:8000 from ~./codelabs/docs/<name-of-your-codelab> folder
+![Claat Output](claat-screenshot.png) 
+
+
+6. Now run claat server to view the html locally at `http://localhost:8000` from ~./codelabs/docs/<name-of-your-codelab> folder
 
     ```bash
     //cd to ./codelabs/docs/<name-of-your-codelab>

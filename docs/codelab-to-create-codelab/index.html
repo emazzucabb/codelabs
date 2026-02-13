@@ -48,7 +48,8 @@
         <h2 is-upgraded>Overview</h2>
 <p>This codelab will show you <strong>how to create your own Codelab</strong> and contribute to QNX.<br> We use the open-source <a href="https://github.com/googlecodelabs/tools" target="_blank">Google Codelabs Tools</a> to author codelabs.</p>
 <h2 is-upgraded>Workflow</h2>
-<p>Below is the high level workflow on what we will do as part of this codelab <a href="FlowDiagram.png" target="_blank"><img alt="Codelab Workflow Diagram" src="img/30cab8dc6e9129e7.png"></a> </p>
+<p>Below is the high level workflow on what we will do as part of this codelab</p>
+<p class="image-container"><img alt="Codelab Workflow Diagram" src="img/30cab8dc6e9129e7.png"></p>
 <h2 is-upgraded>Resources</h2>
 <p>QNX Customized Claat Tool used in this codelab - <a href="https://github.com/qnx/tools" target="_blank">Github Repo </a></p>
 <p>Forum for Codelab Authors - <a href="https://groups.google.com/forum/#!forum/codelab-authors" target="_blank">Forum Link</a></p>
@@ -128,7 +129,7 @@ claat --help
 <li>Create a New Folder for your codelab:<pre><code language="language-bash" class="language-bash">mkdir -p ./codelabs/markdown/&lt;name-of-your-codelab&gt;
 </code></pre>
 </li>
-<li>Create a New Folder and copy markdown-template.md into your newly created folder to  ensure the required tags are included.The id tag must exactly match the .md filename for claat to work correctly.<pre><code language="language-bash" class="language-bash">id: name-of-your-codelab
+<li>Copy <code>markdown-template.md</code> into your newly created folder to  ensure the required tags are included.The id tag must exactly match the .md filename for claat to work correctly.<pre><code language="language-bash" class="language-bash">id: name-of-your-codelab
 title: template to create codelabs
 summary: Learn how to add new Codelabs
 categories: codelabs, setup
@@ -140,15 +141,18 @@ feedback_link: https://github.com/qnx/codelabs/issues
 
 </code></pre>
 </li>
-<li>Rename the markdown file as </li>
-<li>(Optional) Run claat to view your .md file locally as html. Otherwise, skip to step 7<pre><code language="language-bash" class="language-bash">//cd out from ~./markdown/&lt;name-of-your-codelab&gt; folder to ~./codelabs
+<li>Rename the markdown file as your <code><name-of-your-codelab>.md</code></li>
+<li>(Optional) Run claat to view your <code><name-of-your-codelab>.md</code> file locally as html. Otherwise, skip to step 7<pre><code language="language-bash" class="language-bash">//cd out from ~./markdown/&lt;name-of-your-codelab&gt; folder to ~./codelabs
 
 claat export -f html -o docs ./markdown/&lt;name-of-your-codelab&gt; folder/&lt;name-of-your-codelab&gt;.md
 
 </code></pre>
 </li>
-<li>You will see a similar output in terminal and a folder created with html file under ~./codelabs/docs</li>
-<li>Now run claat serve to view the html locally at http://localhost:8000 from ~./codelabs/docs/ folder<pre><code language="language-bash" class="language-bash">//cd to ./codelabs/docs/&lt;name-of-your-codelab&gt;
+<li>You will see a similar output as below in terminal and a folder created same as <code><name-of-your-codelab></code> file under ~./codelabs/docs</li>
+</ol>
+<p class="image-container"><img alt="Claat Output" src="img/31d04e6627780375.png"></p>
+<ol type="1" start="6">
+<li>Now run claat server to view the html locally at <code>http://localhost:8000</code> from ~./codelabs/docs/ folder<pre><code language="language-bash" class="language-bash">//cd to ./codelabs/docs/&lt;name-of-your-codelab&gt;
 
 claat serve index.md
 
