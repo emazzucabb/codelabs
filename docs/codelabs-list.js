@@ -31,6 +31,20 @@ window.CODELABS = [
     ]
   },
   {
+    "title": "How to run Pong with Godot on QNX",
+    "href": "godot-codelab/index.html",
+    "id": "godot-codelab",
+    "authors": "Yun Lee",
+    "updated": "2026-03-20T16:47:53-04:00",
+    "category": [
+      "qnx",
+      "godot"
+    ],
+    "tags": [
+      "beginner"
+    ]
+  },
+  {
     "title": "Using NVMe SSD on Raspberry Pi 5 using QNX",
     "href": "rpi5-using-nvme-ssd/index.html",
     "id": "rpi5-using-nvme-ssd",
