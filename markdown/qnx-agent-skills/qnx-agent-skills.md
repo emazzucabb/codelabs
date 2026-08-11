@@ -22,6 +22,7 @@ A coding agent on its own knows little that is specific to QNX and tends to fall
 * How the skills are organized, and how the agent navigates them
 * Which agents are supported, and how others can use it
 * How to point your agent at the repository and tell it about your target
+* The three prompts that take you from a fresh clone to a validated port
 * Sample tasks the skill set drives, from adapting an APKBUILD to the validation gate
 
 **Prerequisites:**
@@ -49,6 +50,8 @@ The layout:
 ```
 AGENTS.md      the instructions every agent reads: setup, universal rules, skill map
 CLAUDE.md      a pointer to AGENTS.md, so Claude Code finds it automatically
+README.md      orientation: what this repo is and how to start
+RUNBOOK.md     operator guide: what a good run looks like, and how to reset between runs
 TARGET.md      your QNX target: connection, auth, tree path
 skills/        the skill set, one directory per skill
 projects/      per-port notes and reports land here
@@ -76,7 +79,7 @@ qnx-porting (router, read first)
 └── skill-authoring           how to add or extend a skill in this repo
 ```
 
-`qnx-porting` is the entry point. It holds the universal rules that apply to every task (prove claims with command output, never patch an untested change, the human runs all git operations, builds are native on the target) and a router that points at the one focused skill your task needs. Each skill carries a short description of when to use it, so routing is mostly automatic: the agent matches your task to the right skill rather than being told which file to open.
+`qnx-porting` is the entry point. It holds the universal rules that apply to every task (prove claims with command output, never patch an untested change, never push or make the commits a human owns, builds are native on the target) and a router that points at the one focused skill your task needs. Each skill carries a short description of when to use it, so routing is mostly automatic: the agent matches your task to the right skill rather than being told which file to open.
 
 The set is designed to improve itself. One universal rule tells the agent to record what it proves: a platform gotcha goes to `qnx-platform-facts`, a build technique to `qnx-apk-packaging`, a target quirk to `TARGET.md`. Each port that surfaces something new leaves the set better for the next one. If you extend it, `skill-authoring` covers the conventions.
 
@@ -119,9 +122,11 @@ Duration: 3:00
 
 The agent needs to know how to reach your QNX box: its address, how to authenticate, and where your aports tree lives. You do not edit configuration files by hand for this. Tell the agent in plain language, and it records what you told it in `TARGET.md` for you. If something it needs is missing later, it asks. That is the whole idea: you talk to the agent, and the agent maintains the files.
 
-`TARGET.md` also holds a discovery sweep the agent can run on a fresh image to locate the aports tree, so often you can just point it at the target and let it fill in the details.
+`TARGET.md` also holds a discovery sweep the agent can run on a fresh image to enumerate the `aports*` trees it finds. Treat what it returns as candidates rather than an answer: an image often carries several trees that share the same fork as their remote and differ only by branch, in which case "the one whose remote is your fork" selects all of them. Name the authoritative one once, and the agent records it so no later session has to ask.
 
-> **Note:** Work happens on the target over SSH. The agent edits and builds there, and stops before git, so a human reviews and pushes.
+> **Warning:** `TARGET.md` is a tracked file. If you tell the agent a password, it lands in a file git will happily commit, and a password pushed to a shared or public repository is exposed permanently. Prefer key-based SSH. If you do fill in a password, keep your copy out of commits with `git update-index --skip-worktree TARGET.md` — the agent will not run that for you, because it is a decision about your checkout, not a build step.
+
+> **Note:** Work happens on the target over SSH: the agent edits and builds there. It stops short of committing and pushing, so a human reviews the change and owns the git history.
 
 ---
 
@@ -150,18 +155,41 @@ Merge `settings.template.json` into your `~/.claude/settings.json`. It carries a
 
 If you are on a disposable local QEMU image and want to remove friction entirely, there are two stronger levers. Neither belongs on real hardware, a shared machine, or anything networked:
 
-* Grant passwordless apk on the target so the password pipe is not needed:
+* Grant passwordless apk on the target so the password pipe is not needed. **Confirm the real path and user first** — a sudoers rule naming a binary that does not exist parses cleanly, installs cleanly, and then silently never matches, which looks like the rule not working at all:
   ```bash
-  sudo visudo -f /etc/sudoers.d/qnxuser
-  # add:
-  qnxuser ALL=(ALL) NOPASSWD: /system/bin/apk
+  whoami                # the user the agent logs in as, e.g. qnx
+  command -v apk        # the real path, e.g. /usr/bin/apk on the QSTI x86_64 image
+  echo '<user> ALL=(ALL) NOPASSWD: <path-to-apk>' | sudo tee /etc/sudoers.d/10-apk-nopasswd
+  sudo chmod 440 /etc/sudoers.d/10-apk-nopasswd
+  sudo visudo -c        # must report no errors
   ```
-  This lets anything running as `qnxuser` install packages as root with no password, and a package can run code on install, so treat it as passwordless root. Convenient on a throwaway image, a real privilege-escalation surface anywhere else.
+  Add a new drop-in rather than editing an existing one; images often already ship something under `/etc/sudoers.d/`. This lets anything running as that user install packages as root with no password, and a package can run code on install, so treat it as passwordless root. Convenient on a throwaway image, a real privilege-escalation surface anywhere else.
 * Run `claude --dangerously-skip-permissions` to remove action gating altogether. You become the only safety check.
 
 ### The clean fix
 
 The root problem is handling a plaintext password. Remove it and the friction goes away without weakening the target: use key-based SSH instead of `sshpass`, so no password ever crosses the wire. Combined with manual mode and the allow-rules above, this is both safer and smoother than either strong lever.
+
+---
+
+## Drive it with three prompts
+Duration: 4:00
+
+You do not need a script. Three short prompts take you from a fresh clone to a validated port, and they are deliberately vague — the skills carry the detail, so the prompts do not have to.
+
+**1. Can you see the skills? List them.**
+
+Confirms discovery worked before you rely on it. A good answer names the seven skills and identifies `qnx-porting` as the router. If it describes something generic, or answers in Linux terms, the skills did not load — start the agent from inside the repository, or run `setup.sh` for your client.
+
+**2. Connect to my target and show me the aports tree.**
+
+The agent will ask for whatever it does not have: user, host, SSH port, credentials, and which tree is authoritative. Answer in plain language. A good answer comes back with real command output — `uname -a` from the target, the tree path, its branch — rather than a claim that it connected. It records what you told it in `TARGET.md`, so the next session does not ask again.
+
+**3. Port `<package>` and write the report.**
+
+The actual work. The agent loads the router, routes to the porting and packaging skills, builds natively on the target, patches what needs patching, runs the validation gate, and writes a `REPORT.md`. Expect it to show you each failure and its diagnosis along the way — that is the part worth watching, and the part you would otherwise have done yourself.
+
+> **Note:** Keep your own prompts in a local `PROMPTS.md` if you want them consistent between runs. That file is gitignored on purpose: prompts are yours to shape per session, and checking them in tends to turn a three-line exercise into a specification nobody wants to maintain.
 
 ---
 
@@ -179,13 +207,23 @@ With the repository in place, drive real work in plain language. The agent loads
 **Run the validation gate.** Before calling a port done, it runs the gate:
 
 ```bash
-abuild clean && abuild unpack          # patches apply, no Hunk FAILED, no .rej
-abuild -r -c -K                        # builds, tests pass, expected APKs produced
-find pkg -name '*.so*' | sort          # subpackage split correct, nothing orphaned
-git status                             # only intended files modified
+abuild clean && abuild -K unpack prepare   # patches APPLY here, no Hunk FAILED, no .rej
+abuild clean && abuild -r -c -K            # builds, tests pass, expected APKs produced
+find pkg -name '*.so*' | sort              # subpackage split correct, nothing orphaned
+readelf -d pkg/*/usr/lib/*.so.* | grep NEEDED   # every non-libc entry covered by depends=
+git status                                 # read-only check: only intended files modified
 ```
 
-Throughout, the universal rules hold: claims are backed by command output, patches are never made from untested changes, and the human runs every git operation.
+Two of those lines are worth understanding rather than just running. `unpack` only
+extracts the tarball — it is `prepare` that applies the patches, so the shorter
+`abuild unpack` would have you validating against unpatched source. And the `readelf`
+line is there because a package with missing runtime dependencies passes every other
+check: it builds, it tests, it splits correctly, and it only fails on a machine that
+does not already have the dependency installed.
+
+Throughout, the universal rules hold: claims are backed by command output, patches are never made from untested changes, and the agent never pushes or writes the commit history a human owns.
+
+> **Note:** The agent does use `git` — freely, for inspection (`status`, `log`, `diff`, `show`), and it creates a throwaway repository inside `src/` because that is how a correctly formatted patch is generated. What it never does is `git push`, commit to a repository a human reviews, or run destructive commands such as `reset --hard` or `checkout --`. Seeing it run `git diff` is the workflow behaving normally.
 
 ---
 
