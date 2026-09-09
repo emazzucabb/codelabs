@@ -41,7 +41,7 @@ Here is the whole flow at a glance:
 Duration: 2:00
 
 ```bash
-git clone https://github.com/qnx/qnx-agent-skills.git
+git clone https://github.com/qnx-ports/qnx-agent-skills.git
 cd qnx-agent-skills
 ```
 
