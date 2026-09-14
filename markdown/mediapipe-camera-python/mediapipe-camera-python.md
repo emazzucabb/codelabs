@@ -48,25 +48,26 @@ The data path has four parts:
 ## Prerequisites
 Duration: 3:00
 
-> aside positive
->
-> To follow these exact camera instructions, use a
-> [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/) with a
-> [Raspberry Pi Camera Module 3](https://www.raspberrypi.com/products/camera-module-3/).
+Use a [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/) with a
+[Raspberry Pi Camera Module 3](https://www.raspberrypi.com/products/camera-module-3/).
 
 The following platform components must already be present in the target image; this codelab does
 not install them:
 
-- A QNX 8 aarch64 image with working QNX APK repositories.
+- A QNX 8.0.5 QSTI aarch64 image for Raspberry Pi 5 with its matching QNX APK repositories.
+  Keep the repository configuration supplied with that image. It includes older core/extra
+  fallback repositories; do not add the incompatible old 8.0.4 `qnx-extra` repository.
 - The QNX Sensor Framework, which exposes the Raspberry Pi Camera Module 3 to the Camera
-  Library as camera unit 1.
+  Library through the image's `/etc/config/sensor/sensor_rpi5.conf` configuration.
 - QNX Screen with the Raspberry Pi graphics stack, which SDL uses to create the live window.
 - A display connected to the Pi for the live step.
 - Network access from the target to its APK repositories and Google Cloud Storage.
 - A shell on the target with `sudo` access.
 
-These instructions use camera unit 1, which is the unit defined by the validated
-`camera_module3.conf` file.
+Connect Camera Module 3 to **DISP0** with the Pi powered off. These instructions and both
+companion demos select **camera unit 3**, as configured in the QNX 8.0.5 QSTI image.
+Camera unit numbers depend on the image and configuration; they are not physical connector
+numbers. The helper requires NV12 and rejects other frame formats.
 
 ---
 
@@ -90,7 +91,7 @@ Check the imports before continuing:
 python3 -c 'import cv2, mediapipe, numpy, sdl2; print("OpenCV", cv2.__version__, "MediaPipe", mediapipe.__version__, "NumPy", numpy.__version__, "PySDL2", sdl2.__version__)'
 ```
 
-Expected output from the author's target:
+Example output (package versions may vary):
 
 ```text
 OpenCV 4.12.0 MediaPipe 0.10.26 NumPy 2.4.1 PySDL2 0.9.17
@@ -143,7 +144,7 @@ keypoints. It does not identify a person. See the
 [MediaPipe BlazeFace model card](https://storage.googleapis.com/mediapipe-assets/MediaPipe%20BlazeFace%20Model%20Card%20%28Short%20Range%29.pdf)
 for its intended use, limitations, and Apache 2.0 license.
 
-Check the learner-facing commands:
+View the available demo options:
 
 ```bash
 python3 demo_capture_faces.py --help
@@ -155,52 +156,22 @@ python3 demo_display_faces.py --help
 ## Select Raspberry Pi Camera Module 3
 Duration: 3:00
 
-Some Raspberry Pi images start the QNX Sensor Framework service with `sensor_demo.conf`, which
-produces a simulated color-bar image. Restart the service with the Raspberry Pi Camera Module 3
-configuration:
+Check the image's configuration and currently running service before changing anything:
 
 ```bash
-sudo sh -c 'slay -f sensor 2>/dev/null || true
-sensor -U 521:521 -b external -r /data/share/sensor \
-  -c /system/etc/config/sensor/camera_module3.conf \
-  >/tmp/sensor-camera-module3.log 2>&1 &'
-waitfor /dev/sensor/camera1 10
-ls -l /dev/sensor/camera1
+ls -l /etc/config/sensor/sensor_rpi5.conf
+sudo pidin ar | grep '[s]ensor'
+waitfor /dev/sensor/camera3 10
+ls -l /dev/sensor/camera3
 ```
 
-Representative `ls` output from the author's target:
+On QNX 8.0.5 QSTI, the default sensor service starts with
+`/etc/config/sensor/sensor_rpi5.conf` and exposes camera3 when the camera is detected.
+If these checks succeed, continue to capture; no service restart is needed. The next step
+checks that the camera supplies NV12 frames.
 
-```text
--rw-rw----  1 521 sensor 0 2026-08-25 15:12 /dev/sensor/camera1
-```
-
-No desktop window appears at this point. Check both the device and Sensor Framework process:
-
-```bash
-if [ -e /dev/sensor/camera1 ] &&
-   pidin ar | grep -q '[s]ensor'; then
-    echo "PASS: Camera Module 3 service is ready"
-else
-    echo "FAIL: Camera service or camera1 device is missing"
-fi
-```
-
-Expected result:
-
-```text
-PASS: Camera Module 3 service is ready
-```
-
-This check proves that the service and camera unit are ready. The capture demo in the next step
-proves that real frames arrive. An empty `/tmp/sensor-camera-module3.log` is normal when the
-service reports no errors. If `waitfor` times out or the check fails, inspect the log before
-continuing:
-
-```bash
-cat /tmp/sensor-camera-module3.log
-```
-
-Run this configuration step again after a reboot if the image returns to the simulator.
+If the configuration file or camera3 is missing, check the image version, DISP0 connection,
+and sensor startup diagnostics before continuing.
 
 ---
 
@@ -211,22 +182,22 @@ Process 60 real-camera frames and save the last annotated RGB image:
 
 ```bash
 cd ~/mediapipe-camera-python
-python3 demo_capture_faces.py --frames 60 --output annotated_face.png
+python3 demo_capture_faces.py --camera-unit 3 --frames 60 --output annotated_face.png
 ```
 
-The face count depends on the scene. A successful real-camera run looks like this:
+Place a face in view of the camera. Example output:
 
 ```text
 camera open; running 60 frames
-  frame 0 faces=<count> size=2304x1296
+  frame 0 faces=1 size=2304x1296
   ...
-PROCESSED 60 frames in <seconds>s = <fps> FPS; max faces=<count>
+PROCESSED 60 frames in 2.4s = 25.1 FPS; max faces=1
 wrote annotated_face.png
 CLEAN EXIT
 ```
 
-`size=2304x1296` is the native frame size observed from the configured Raspberry Pi Camera
-Module 3. The reported FPS is a measurement from your run, not a fixed target.
+The frame size comes from the selected NV12 stream. Face counts and frame rate vary with
+the scene and system load.
 
 To inspect the result on your development computer, run this command there and replace
 `TARGET_IP` with the Pi's address:
@@ -235,9 +206,9 @@ To inspect the result on your development computer, run this command there and r
 scp <TARGET_USER>@<TARGET_IP>:~/mediapipe-camera-python/annotated_face.png .
 ```
 
-![MediaPipe face detection result from Raspberry Pi Camera Module 3 with a green box around a face](mediapipe-face-detection-result.png)
-
-*A Raspberry Pi Camera Module 3 frame annotated by the MediaPipe Tasks face detector.*
+Open `annotated_face.png` on your development computer. Detected faces should have a green
+bounding box and facial keypoints. If there are no annotations, place a face closer to the
+camera and repeat the capture.
 
 ---
 
@@ -248,7 +219,7 @@ Run the live demo for up to 1,200 frames. Press Escape in the window to stop ear
 
 ```bash
 cd ~/mediapipe-camera-python
-python3 demo_display_faces.py --frames 1200 --width 1152 --height 648
+python3 demo_display_faces.py --camera-unit 3 --frames 1200 --width 1152 --height 648
 ```
 
 During setup, the demo lists the available SDL render drivers and then verifies the selected
@@ -272,26 +243,28 @@ releases MediaPipe, SDL, camera buffers, the viewfinder, and QNX pulse resources
 CLEAN EXIT
 ```
 
-A successful live run therefore has three visible markers: the updating QNX Screen window, an
-exact `opengles2` renderer backed by Broadcom `V3D`, and `CLEAN EXIT` when the demo stops.
+A successful live run shows an updating QNX Screen window with face annotations, reports
+the `opengles2` renderer backed by Broadcom `V3D`, and prints `CLEAN EXIT` when it stops.
+Performance depends on the scene and system load.
 
 ---
 
 ## Troubleshooting
 Duration: 4:00
 
-### The camera shows color bars or `/dev/sensor/camera1` is missing
+### The camera shows color bars or `/dev/sensor/camera3` is missing
 
-The QNX Sensor Framework service is using the simulator or failed to start the Raspberry Pi
-Camera Module 3. Repeat the `camera_module3.conf` commands and inspect
-`/tmp/sensor-camera-module3.log`. Also check the camera cable and confirm the configuration
-file exists.
+Check that Camera Module 3 is connected to DISP0, the target uses a QNX 8.0.5 QSTI
+image, and the sensor service uses `/etc/config/sensor/sensor_rpi5.conf`. Color bars can indicate
+a simulated stream. Verify the selected unit and its NV12 output against the active
+configuration before proceeding. Other images may use different camera units; both demos
+accept `--camera-unit` to select a verified compatible stream.
 
 ### A frame wait times out
 
 The helper bounds each frame wait and reports a `TimeoutError` instead of hanging. Confirm the
-QNX Sensor Framework service is running, then stop any other application that has camera unit
-1 open and try again.
+QNX Sensor Framework service is running, then stop any other
+application that has the selected camera unit open and try again.
 
 ### `opengles2` or V3D verification fails
 
@@ -301,7 +274,7 @@ with the Raspberry Pi graphics stack and that the image provides `libEGL.so.1`,
 diagnostic mode:
 
 ```bash
-python3 demo_display_faces.py --frames 120 --renderer software
+python3 demo_display_faces.py --camera-unit 3 --frames 120 --renderer software
 ```
 
 This proves the software display path only. It is not evidence of hardware acceleration.
