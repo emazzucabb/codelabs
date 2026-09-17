@@ -28,7 +28,7 @@ A coding agent on its own knows little that is specific to QNX and tends to fall
 **Prerequisites:**
 
 * A QNX 8.0 self-hosted target (a Quick Start Target Image or Custom Target Image on QEMU or Raspberry Pi).
-* A skills-capable agent installed: Claude Code or Codex.
+* A skills-capable agent (Claude Code or Codex) installed on your development host. The agent connects over SSH to the QNX self-hosted target, where builds run natively.
 * `git`, and `sshpass` if you use password-based SSH to the target.
 
 Here is the whole flow at a glance:
@@ -45,22 +45,27 @@ git clone https://github.com/qnx-ports/qnx-agent-skills.git
 cd qnx-agent-skills
 ```
 
-The layout:
+The tracked top-level layout on the repository's `initial-import` branch (the default `main` branch is currently empty):
 
 ```
-AGENTS.md      the instructions every agent reads: setup, universal rules, skill map
-CLAUDE.md      a pointer to AGENTS.md, so Claude Code finds it automatically
-README.md      orientation: what this repo is and how to start
-RUNBOOK.md     operator guide: what a good run looks like, and how to reset between runs
-TARGET.md      your QNX target: connection, auth, tree path
-skills/        the skill set, one directory per skill
-projects/      per-port notes and reports land here
-setup.sh       links skills/ into a global agent directory, if your client needs it
-run.sh         optional QEMU launcher, if you bring your own QNX image
-settings.template.json   optional Claude Code permission rules, to prompt less
+.agents/                contains skills -> ../skills for skills-capable agents
+.claude/                contains skills -> ../skills for Claude Code
+.codex/                 contains skills -> ../skills for Codex
+.gitignore              excludes local operator notes from version control
+AGENTS.md               shared instructions: setup, universal rules, skill map
+CLAUDE.md               points Claude Code to AGENTS.md
+README.md               repository orientation and getting started
+TARGET.md               template for QNX target connection and tree details
+projects/               project index template and per-port notes/reports
+run.sh                  optional QEMU launcher for your own QNX image
+settings.template.json  optional Claude Code permission-rule examples
+setup.sh                links skills into a global agent directory if needed
+skills/                 focused skills, one directory per skill
 ```
 
-There is one copy of the skills on disk, in `skills/`. The directories `.claude/skills`, `.codex/skills`, and `.agents/skills` are symlinks to it, so a fix to a skill is a single edit that every client sees.
+This lists tracked repository content. Git creates `.git/` locally when you clone; it is repository metadata, not a delivered source entry. Local operator notes are excluded from this layout.
+
+There is one copy of the skills on disk, in `skills/`. The `skills` entries inside `.claude/`, `.codex/`, and `.agents/` are symlinks to `../skills`, so a fix to a skill is a single edit that every client sees.
 
 ---
 
@@ -185,7 +190,7 @@ Confirms discovery worked before you rely on it. A good answer names the seven s
 
 The agent will ask for whatever it does not have: user, host, SSH port, credentials, and which tree is authoritative. Answer in plain language. A good answer comes back with real command output — `uname -a` from the target, the tree path, its branch — rather than a claim that it connected. It records what you told it in `TARGET.md`, so the next session does not ask again.
 
-**3. Port `<package>` and write the report.**
+**3. Port &lt;package&gt; and write the report.**
 
 The actual work. The agent loads the router, routes to the porting and packaging skills, builds natively on the target, patches what needs patching, runs the validation gate, and writes a `REPORT.md`. Expect it to show you each failure and its diagnosis along the way — that is the part worth watching, and the part you would otherwise have done yourself.
 
@@ -230,7 +235,7 @@ Throughout, the universal rules hold: claims are backed by command output, patch
 ## The port report
 Duration: 3:00
 
-When a port finishes or hits a blocker, the agent writes a `REPORT.md` into that package's folder under `projects/apks/<pkgname>/`. It is the document a human reads to review the port without re-running anything or reading the whole session, and it follows a fixed structure so every port reads the same way:
+When a port finishes or hits a blocker, the agent writes a `REPORT.md` into that package's folder under `projects/apks/&lt;pkgname&gt;/`. It is the document a human reads to review the port without re-running anything or reading the whole session, and it follows a fixed structure so every port reads the same way:
 
 * **Summary**: what the port is and where it ended up, in a few sentences.
 * **What was produced**: the packages and subpackages that were built.
@@ -261,4 +266,4 @@ Duration: 1:00
 
 You cloned `qnx-agent-skills`, learned how its router and focused skills are organized, pointed your agent at it, told it about your target, and used it to drive native aports work. Each port that surfaces something new can be recorded back into the skills, so the set keeps improving.
 
-Share what you build or hit a problem: file an issue at https://github.com/qnx/codelabs/issues, or join the community on Discord (https://discord.gg/Jj4EkkrFTT) and Reddit (https://www.reddit.com/r/qnx).
+Share what you build or ask for help: file an issue at https://github.com/qnx/codelabs/issues, or join the QNX Everywhere community on Discord (https://discord.gg/Jj4EkkrFTT) and Reddit (https://www.reddit.com/r/qnx).
