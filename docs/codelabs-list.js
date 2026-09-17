@@ -1,11 +1,27 @@
 window.CODELABS = [
   {
+    "title": "Cross-compile for QNX Using Open Source Packages",
+    "href": "apk-based-cross-compile/index.html",
+    "id": "apk-based-cross-compile",
+    "authors": "Aaron Bassett",
+    "summary": "Simplify QNX cross-compilation with prebuilt open source packages. Use apk-tools to manage dependencies, wire to qcc, and build C & GTK4 applications.",
+    "updated": "2026-07-27T14:30:26-04:00",
+    "category": [
+      "qnx",
+      "porting",
+      "apk"
+    ],
+    "tags": [
+      "intermediate"
+    ]
+  },
+  {
     "title": "Building Maelstrom on QNX",
     "href": "build-maelstrom-on-qnx/index.html",
     "id": "build-maelstrom-on-qnx",
     "authors": "Roberto Speranza",
     "summary": "Learn how to modify and build the game Maelstrom on QNX",
-    "updated": "2026-04-30T14:58:04-04:00",
+    "updated": "2026-07-27T14:36:44-04:00",
     "category": [
       "self-hosting",
       "sdlgames"
@@ -20,7 +36,7 @@ window.CODELABS = [
     "id": "claude-code",
     "authors": "QNX Developer Relations",
     "summary": "Learn how to leverage Claude Code for target-aware AI development on QNX 8.",
-    "updated": "2026-04-30T14:58:04-04:00",
+    "updated": "2026-06-19T17:30:20-07:00",
     "category": [
       "ai"
     ],
@@ -38,6 +54,23 @@ window.CODELABS = [
     "category": [
       "codelabs",
       "setup"
+    ],
+    "tags": [
+      "beginner"
+    ]
+  },
+  {
+    "title": "Configure multiple camera sources on Raspberry Pi 5",
+    "href": "configure-multiple-camera-sources-on-RPI5/index.html",
+    "id": "configure-multiple-camera-sources-on-RPI5",
+    "authors": "Terence Ang",
+    "summary": "Learn how to configure multiple camera sources on a Pi 5 target with QNX 8.0.",
+    "updated": "2026-06-18T15:59:38-04:00",
+    "category": [
+      "codelabs",
+      "setup",
+      "qnx-sensor-framework",
+      "camera"
     ],
     "tags": [
       "beginner"
@@ -91,12 +124,30 @@ window.CODELABS = [
     ]
   },
   {
+    "title": "MediaPipe Camera Sample",
+    "href": "mediapipe-camera-sample/index.html",
+    "id": "mediapipe-camera-sample",
+    "authors": "Ethan Leir",
+    "summary": "Write a camera application with MediaPipe and native QNX APIs",
+    "updated": "2026-06-19T17:30:20-07:00",
+    "category": [
+      "qnx",
+      "mediapipe",
+      "qnx-sensor-framework",
+      "ai",
+      "camera"
+    ],
+    "tags": [
+      "advanced"
+    ]
+  },
+  {
     "title": "Porting an Alpine Linux Package to QNX 8.0",
     "href": "porting-alpine-package-qnx/index.html",
     "id": "porting-alpine-package-qnx",
     "authors": "Elliott Mazzuca",
     "summary": "A step-by-step guide to porting an existing Alpine Linux package (APKBUILD) to the QNX aports repository, using gtk4 as the worked example",
-    "updated": "2026-05-28T10:44:09-04:00",
+    "updated": "2026-06-18T15:59:38-04:00",
     "category": [
       "qnx",
       "alpine",
@@ -139,6 +190,23 @@ window.CODELABS = [
       "qnx",
       "rpi5",
       "ssd"
+    ]
+  },
+  {
+    "title": "Running llama.cpp on QNX 8.0 with Vulkan GPU Acceleration",
+    "href": "running-llama-cpp-qnx/index.html",
+    "id": "running-llama-cpp-qnx",
+    "authors": "Elliott Mazzuca",
+    "summary": "Install the llama.cpp packages on QNX 8.0, set up a Vulkan-capable QEMU target, load a model, and run LLM inference on CPU and on the GPU",
+    "updated": "2026-06-20T16:56:29-07:00",
+    "category": [
+      "qnx",
+      "llama.cpp",
+      "vulkan",
+      "ai"
+    ],
+    "tags": [
+      "intermediate"
     ]
   },
   {

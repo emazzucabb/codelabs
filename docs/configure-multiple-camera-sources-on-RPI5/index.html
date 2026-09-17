@@ -1,0 +1,288 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Configure multiple camera sources on Raspberry Pi 5</title>
+
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../js/codelab-elements.css">
+
+  
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+
+     
+    google-codelab #done {
+      display: none !important;
+    }
+  </style>
+
+</head>
+<body>
+
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+
+  <google-codelab codelab-gaid=""
+                  codelab-ga4id=""
+                  id="configure-multiple-camera-sources-on-RPI5"
+                  title="Configure multiple camera sources on Raspberry Pi 5"
+                  environment="web"
+                  feedback-link="https://github.com/qnx/codelabs/issues">
+    
+      <google-codelab-step label="Introduction" duration="0">
+        <p>This codelab describes how to configure multiple camera sources on the Raspberry Pi 5. The instructions provided in this codelab enable support for multiple camera inputs.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Prerequisites" duration="0">
+        <h2 is-upgraded>Hardware</h2>
+<ul>
+<li>1 x Raspberry Pi 5</li>
+<li>2 x Camera Module 3 units</li>
+<li>1 x Logitech C920x (or C920)</li>
+</ul>
+<h2 is-upgraded>Quick Start Target Image (QSTI)</h2>
+<ul>
+<li>On the host, launch QNX Software Center and install the QSTI image for QNX 8.0.5, for example: com.qnx.qnx800.quickstart.rpi5/0.5.0.00050T202609021847L</li>
+<li>Previous QSTI images, such as the image with QNX 8.0.4, are not compatible with this codelab and should not be used.</li>
+<li>Use Raspberry Pi Imager or another imaging tool to write the image to the SD card.</li>
+<li>Insert the SD card into the Raspberry Pi 5.</li>
+<li>Connect the two Camera Module 3 units and the C920 USB camera.</li>
+<li>Power on the Raspberry Pi 5.</li>
+</ul>
+<h2 is-upgraded>Dependent packages</h2>
+<p>The required packages are already installed. In the case that you need re-installation, install the following packages:</p>
+<pre><code language="language-sh" class="language-sh">sudo apk add \
+    yaml \
+    libturbojpeg \
+    qnx-egl \
+    qnx-gles \
+    qnx-screen \
+    qnx-devu-hcd-dwc3-xhci \
+    qnx-rpi-camera-ipa \
+    qnx-io-usb-otg \
+    qnx-usb \
+    qnx-multimedia-framework \
+    qnx-sensor-framework \
+    qnx-sensor-framework-utils \
+    qnx-sensor-framework-example-configs \
+    qnx-sf-camera-imx708 \
+    qnx-sf-platform-broadcom-rpi5
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Hardware Configuration" duration="0">
+        <h2 is-upgraded>Connect two Camera Module 3 units to the DISP0 and DISP1 ports as shown below:</h2>
+<p class="image-container"><img alt="Connect 2 Camera Module 3" src="img/e591100d53bda8de.jpg"></p>
+<h2 is-upgraded>Connect the Logitech C920x (or C920) to one of the USB ports as shown below:</h2>
+<p class="image-container"><img alt="Connect the Logitech C920x" src="img/710f74f44f9bf46d.jpg"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Validate Configuration" duration="0">
+        <h2 is-upgraded>Verify that the sensor service is running</h2>
+<p>Run</p>
+<pre><code language="language-sh" class="language-sh">sudo pidin ar | grep sensor
+</code></pre>
+<p>You should see output similar to the following:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ sudo pidin ar | grep sensor
+  913444 sensor -U 521:521 -b external -r /data/share/sensor -c /etc/config/sensor/sensor_rpi5.conf
+</code></pre>
+<h2 is-upgraded>Verify that the I2C interfaces are configured correctly with <code>-q0xa8</code>, <code>-q0xab</code> and <code>-q0xad</code></h2>
+<p>Run</p>
+<pre><code language="language-sh" class="language-sh">sudo pidin ar | grep i2c-dwc-rpi5
+</code></pre>
+<p>You should see that <code>-q0xa8</code>, <code>-q0xab</code> and <code>-q0xad</code> have been already configured as follows:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ sudo pidin ar | grep i2c-dwc-rpi5
+  671765 /system/bin/i2c-dwc-rpi5 -p0x1f00074000 -c200000000 -q0xa8
+  856098 /system/bin/i2c-dwc-rpi5 -p0x1f00080000 -c200000000 -q0xab
+  884771 /system/bin/i2c-dwc-rpi5 -p0x1f00088000 -c200000000 -q0xad
+</code></pre>
+<h2 is-upgraded>Verify that camera sensor devices are available</h2>
+<p>Run</p>
+<pre><code language="language-sh" class="language-sh">ls -al /dev/sensor
+</code></pre>
+<p>You should see <code>camera1</code> through <code>camera5</code> as follows:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ ls -al /dev/sensor
+total 0
+-rw-rw----  1 521 sensor 0 1970-01-01 00:00 camera1
+-rw-rw----  1 521 sensor 0 1970-01-01 00:00 camera2
+-rw-rw----  1 521 sensor 0 1970-01-01 00:00 camera3
+-rw-rw----  1 521 sensor 0 1970-01-01 00:00 camera4
+-rw-rw----  1 521 sensor 0 1970-01-01 00:00 camera5
+-rw-rw----  1 521 sensor 0 1970-01-01 02:20 data1
+-rw-rw----  1 521 sensor 0 1970-01-01 02:20 data2
+</code></pre>
+<h2 is-upgraded>Verify that the IRQs are enabled for the two Camera Module 3 units</h2>
+<p>Run</p>
+<pre><code language="language-sh" class="language-sh">sudo msix-rp1 | grep -E &#34;I2C4|I2C6|MIPI0|MIPI1&#34;
+</code></pre>
+<p>You should see output similar to the following:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ sudo msix-rp1 | grep -E &#34;I2C4|I2C6|MIPI0|MIPI1&#34;
+  11 |             I2C4 | -EI | **-Ml | *l
+  13 |             I2C6 | -EI | **-Ml | *l
+  47 |            MIPI0 | -EI | ---Me | -e
+  48 |            MIPI1 | -EI | ---Me | -e
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Launch the cameras" duration="0">
+        <p>In this configuration, the cameras are assigned as follows:</p>
+<ul>
+<li>camera 1: simulation camera</li>
+<li>camera 2: video playback camera</li>
+<li>camera 3: Camera Module 3 connected to DISP0</li>
+<li>camera 4: Camera Module 3 connected to DISP1</li>
+<li>camera 5: Logitech C920x (or C920) USB camera</li>
+</ul>
+<h2 is-upgraded>Launch the camera_example3_viewfinder for each of the five cameras, one at a time</h2>
+<pre><code language="language-sh" class="language-sh">camera_example3_viewfinder -u 1 &amp;
+camera_example3_viewfinder -u 2 &amp;
+camera_example3_viewfinder -u 3 &amp;
+camera_example3_viewfinder -u 4 &amp;
+camera_example3_viewfinder -u 5 &amp;
+</code></pre>
+<h2 is-upgraded>Verify that the background processes are running</h2>
+<p>Run</p>
+<pre><code language="language-sh" class="language-sh">pidin ar | grep camera_example3_viewfinder
+</code></pre>
+<p>You should see output similar to the following:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ pidin ar | grep camera_example3_viewfinder
+1679412 camera_example3_viewfinder -u 1
+1683509 camera_example3_viewfinder -u 2
+1687606 camera_example3_viewfinder -u 3
+1691703 camera_example3_viewfinder -u 4
+1687606 camera_example3_viewfinder -u 5
+</code></pre>
+<h2 is-upgraded>Switch between cameras</h2>
+<p>If a USB keyboard is connected to the Raspberry Pi 5, you can press <code>Alt</code> + <code>Tab</code> to switch between cameras.</p>
+<h2 is-upgraded>Multiplex the cameras</h2>
+<p>Stop the <code>camera_example3_viewfinder</code> processes with</p>
+<pre><code language="language-sh" class="language-sh">slay camera_example3_viewfinder
+</code></pre>
+<p>When prompted, answer <code>Y</code> for each process. You should see output similar to the following:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ slay camera_example3_viewfinder
+slay: usr/bin/camera_example3_viewfinder 1679412 on (tty not known) (y/N)? Y
+slay: usr/bin/camera_example3_viewfinder 1683509 on (tty not known) (y/N)? Y
+slay: usr/bin/camera_example3_viewfinder 1687606 on (tty not known) (y/N)? Y
+slay: usr/bin/camera_example3_viewfinder 1691703 on (tty not known) (y/N)? Y
+slay: usr/bin/camera_example3_viewfinder 1687606 on (tty not known) (y/N)? Y
+</code></pre>
+<p>Alternatively, you can force-stop the <code>camera_example3_viewfinder</code> applications without being prompted by using</p>
+<pre><code language="language-sh" class="language-sh">slay -f camera_example3_viewfinder
+</code></pre>
+<p>You should see output similar to the following:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ slay -f camera_example3_viewfinder
+slay: usr/bin/camera_example3_viewfinder 10252340 on (tty not known)
+slay: usr/bin/camera_example3_viewfinder 10256437 on (tty not known)
+slay: usr/bin/camera_example3_viewfinder 10260534 on (tty not known)
+slay: usr/bin/camera_example3_viewfinder 10264631 on (tty not known)
+slay: usr/bin/camera_example3_viewfinder 10268728 on (tty not known)
+</code></pre>
+<p>Test whether the cameras can be multiplexed simultaneously with <code>camera_mux -n N</code>, where N is the total number of cameras to be multiplexed.</p>
+<p>However, the <code>fullscreen-winmgr</code> process currently prevents this.</p>
+<p>Stop the <code>fullscreen-winmgr</code> process before multiplexing the camera streams.</p>
+<pre><code language="language-sh" class="language-sh">sudo slay fullscreen-winmgr
+</code></pre>
+<p>Then multiplex the five cameras</p>
+<pre><code language="language-sh" class="language-sh">camera_mux -n 5
+</code></pre>
+<p>The following image shows five cameras being multiplexed: <img alt="Multiplex 5 Cameras" src="img/63d73cb85600d8de.jpg"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Troubleshooting" duration="0">
+        <h2 is-upgraded>Verify the QSTI Image Version</h2>
+<p>Run the following command to verify the QSTI image version:</p>
+<pre><code language="language-sh" class="language-sh">sudo use -i /proc/boot/procnto-smp-instr
+</code></pre>
+<p>The output should contain a TAGID indicating QNX OS 8.0.5, for example:</p>
+<pre><code language="language-sh" class="language-sh">$ sudo use -i /proc/boot/procnto-smp-instr
+...
+TAGID=QNXOS_805-XXX
+...
+</code></pre>
+<h2 is-upgraded>Verify that the two Camera Module 3 units are detected</h2>
+<p>Run</p>
+<pre><code language="language-sh" class="language-sh">sudo slog2info -b sensor_service | grep -E &#34;Camera 3|Camera 4&#34;
+</code></pre>
+<p>You should see output similar to the following:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ sudo slog2info -b sensor_service | grep -E &#34;Camera 3|Camera 4&#34;
+Jan 01 00:00:05.273          sensor_service.852004                debug      1  [ext]int getResolutions(platform_external_handle_t, fsp_sensor_UnitType, fsp_sensor_FormatType, int*, const fsp_sensor_ResType**)(966): Camera 3: 2 resolutions for type 1
+Jan 01 00:00:05.273          sensor_service.852004                debug      1  [ext]int getFramerates(platform_external_handle_t, fsp_sensor_UnitType, fsp_sensor_ResType*, fsp_sensor_FormatType, int*, bool*, float*)(1010): Camera 3: rates 1, type 1, resolution 2304 x 1296 maxmin 0
+Jan 01 00:00:05.273          sensor_service.852004                debug      1  [ext]int getResolutions(platform_external_handle_t, fsp_sensor_UnitType, fsp_sensor_FormatType, int*, const fsp_sensor_ResType**)(966): Camera 4: 2 resolutions for type 1
+Jan 01 00:00:05.273          sensor_service.852004                debug      1  [ext]int getFramerates(platform_external_handle_t, fsp_sensor_UnitType, fsp_sensor_ResType*, fsp_sensor_FormatType, int*, bool*, float*)(1010): Camera 4: rates 1, type 1, resolution 2304 x 1296 maxmin 0
+
+</code></pre>
+<p>If either of the Camera Module 3 units is not detected, inspect the ribbon cables to ensure that they are firmly connected to the Raspberry Pi 5 ports.</p>
+<h2 is-upgraded>Verify that the Logitech camera is detected</h2>
+<p>Run <code>usb</code> or <code>usb -vvv</code> for more detailed information.</p>
+<p>You should see output similar to the followings:</p>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ usb
+...
+USB 1 (XHCI) v10.00, v1.01 DDK, v2.00 HCD, DLL: Active
+
+Device Address             : 1
+Vendor                     : 0x046d (Logitech)
+Product                    : 0x08e5 (HD Pro Webcam C920)
+Class                      : 0xef (Miscellaneous)
+Subclass                   : 0x02
+Protocol                   : 0x01
+...
+</code></pre>
+<pre><code language="language-sh" class="language-sh">[qnxuser@qnxpi ~]$ usb -vvv
+...
+USB 1 (XHCI) v10.00, v1.01 DDK, v2.00 HCD, DLL: Active
+    Control, Interrupt, Bulk(SG), Isoch(Stream), High Speed, Super Speed, DMA:32-bit
+
+Device Address             : 1
+Upstream Host Controller   : 1
+Upstream Device Address    : 0
+Upstream Port              : 1
+Upstream Port Speed        : High
+Vendor                     : 0x046d (Logitech)
+Product                    : 0x08e5 (HD Pro Webcam C920)
+...
+</code></pre>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="../js/native-shim.js"></script>
+  <script src="../js/custom-elements.min.js"></script>
+  <script src="../js/prettify.js"></script>
+  <script src="../js/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+  <script>
+    
+    navigation.addEventListener("navigate", (event) => {
+    const url = new URL(event.destination.url);
+
+    if (url.pathname == "/") {
+      window.location.href = "https://qnx.github.io/codelabs/";
+    }
+  });
+  </script>
+
+</body>
+</html>
