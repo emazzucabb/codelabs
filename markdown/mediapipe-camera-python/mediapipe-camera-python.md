@@ -4,7 +4,7 @@ summary: Install prebuilt MediaPipe on QNX and run live face detection with Rasp
 categories: qnx, mediapipe, qnx-sensor-framework, AI, camera
 tags: intermediate
 difficulty: 2
-status: draft
+status: published
 authors: Elliott Mazzuca
 feedback_link: https://github.com/qnx/codelabs/issues
 

@@ -44,7 +44,7 @@ stream on DISP0. Unit numbers come from the configuration, not the connector lab
 
 Install the required dependencies:
 ```bash
-sudo apk add bazel6 cmake ninja opencv-dev qnx-sensor-framework-dev
+sudo apk add bazel6 cmake ninja opencv-dev qnx-sf-base-dev
 ```
 
 ---
@@ -57,6 +57,17 @@ Start by cloning MediaPipe,
 git clone https://github.com/qnx-ports/mediapipe.git --branch qnx-v0.10.26
 cd mediapipe
 ```
+
+When using Clang 22, make its resource directory available at the path expected
+by the build. If `/usr/lib/clang/22` does not already exist, run:
+
+```bash
+sudo mkdir -p /usr/lib/clang
+sudo ln -s /usr/lib/llvm22/lib/clang/22 /usr/lib/clang/22
+```
+
+The link target must exist. If `/usr/lib/clang/22` already exists, check that it
+resolves to `/usr/lib/llvm22/lib/clang/22` instead of replacing it.
 
 Then, build MediaPipe's QNX examples for cpu:
 ```bash
