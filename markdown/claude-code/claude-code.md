@@ -85,20 +85,27 @@ _Next up: set up Claude Code for QNX._
 ## Set up Claude Code for QNX
 Duration: 4:00
 
-Claude Code is set up on QNX using the [`claude-code-qnx`](https://github.com/qnx/claude-code-qnx) project. Rather than repeat its setup steps here (where they could fall out of date), follow the instructions in the project's `README.md`, which is the source of truth.
+Claude Code is set up on QNX using the [`claude-code-qnx`](https://github.com/qnx/claude-code-qnx) project. Rather than repeat its setup steps here (where they could fall out of date), follow the project's `README.md` and linked installation guide, with the version selection below.
 
 1. Open the project and read its `README.md`:
 
     [github.com/qnx/claude-code-qnx](https://github.com/qnx/claude-code-qnx)
 
-2. Follow the README's setup instructions on your QNX target. At a high level, it has you clone the project, extract the Claude Code JavaScript bundle, install the launcher's dependencies, and put the `claude-qnx` launcher on your `PATH`.
+2. Follow the README's set up instructions on your QNX target. At a high level, it has you clone the project, extract the Claude Code JavaScript bundle, install the launcher's dependencies, and put the `claude-qnx` launcher on your `PATH`. In the linked [`INSTALL.md`](https://github.com/qnx/claude-code-qnx/blob/main/INSTALL.md), use the following command for **Step 2: Extract the JavaScript bundle**, in place of `node extract.js --latest`:
+
+    ```bash
+    cd /usr/lib/claude-code
+    node extract.js --version 2.1.196
+    ```
+
+    Terrence Ang [reported on September 10, 2026](https://github.com/qnx/codelabs/pull/48#discussion_r3982211241) that extraction with `--latest` failed and version `2.1.196` worked. Use this reported working version for this codelab; compatibility with newer versions has not been verified here. Then continue with the installation guide's remaining steps. Use the same pinned version if you need to repeat extraction during troubleshooting.
 
 3. When you finish, confirm the launcher runs:
     ```bash
     claude-qnx --version
     ```
 
-> If a step gives you trouble, the project's README includes a troubleshooting section covering the most common issues.
+> If a step gives you trouble, the project's installation guide includes a troubleshooting section covering the most common issues.
 
 _Next up: run Claude Code and log in._
 
