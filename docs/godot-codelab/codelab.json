@@ -9,7 +9,7 @@
   "title": "Running Pong with Godot on QNX",
   "authors": "Yun Lee",
   "summary": "Running Pong with Godot on QNX",
-  "source": "./markdown/godot-codelab/godot-codelab.md",
+  "source": "/Users/jhanam/dev/codelabs-qnx/markdown/godot-codelab/godot-codelab.md",
   "theme": "",
   "status": [
     "published"

@@ -16,6 +16,8 @@ Duration: 1:00
 
 This codelab walks you through the process of installing Claude Code on the QNX Developer Desktop.
 
+This codelab follows the [`claude-code-qnx` installation guide](https://github.com/qnx/claude-code-qnx/blob/main/INSTALL.md).
+
 ### AI Coding on the Target
 
 Agentic coding tools are even more effective for embedded project development when they run directly on the target system. With Claude Code running on your target, you can use it to build, deploy, test, debug, and monitor processes.
@@ -71,7 +73,13 @@ Claude Code runs on Node.js, so first install Node.js and npm on your target.
 
     (The default password for `sudo` is `qnxuser`.) You should see a successful installation of several packages, including `node`.
 
-2. Test your Node.js installation:
+2. Configure npm to install global packages without root:
+
+    ```sh
+    npm config set prefix '~/.local'
+    ```
+
+3. Test your Node.js installation:
     ```bash
     node -v
     ```
