@@ -50,7 +50,7 @@ A quick note on what you're about to install, because it is not the stock packag
 
 The official Claude Code is distributed as a single self-contained binary built with the [Bun](https://bun.sh) runtime. Bun has not been ported to QNX, so that stock binary does not run here. The Claude Code *application* itself is just JavaScript, though, and QNX does have Node.js.
 
-The [`claude-code-qnx`](https://github.com/qnx/claude-code-qnx) project bridges that gap. It extracts the JavaScript application out of the official Bun binary and runs it under QNX's Node.js, with a small compatibility shim that reimplements the handful of Bun-specific APIs the app expects. The result is the same Claude Code, running natively on your QNX target through a launcher called `claude-qnx`.
+The [`claude-code-qnx`](https://github.com/qnx/claude-code-qnx) project bridges that gap. It extracts the JavaScript application out of the official Bun binary and runs it under QNX's Node.js, with a small compatibility shim that reimplements the handful of Bun-specific APIs the app expects. The `claude-qnx` launcher runs the extracted application on your QNX target.
 
 In the next steps you'll install Node.js, then set up Claude Code by following that project's instructions.
 
@@ -85,20 +85,18 @@ _Next up: set up Claude Code for QNX._
 ## Set up Claude Code for QNX
 Duration: 4:00
 
-Claude Code is set up on QNX using the [`claude-code-qnx`](https://github.com/qnx/claude-code-qnx) project. Rather than repeat its setup steps here (where they could fall out of date), follow the project's `README.md` and linked installation guide, with the version selection below.
+Use the [`claude-code-qnx`](https://github.com/qnx/claude-code-qnx) project to install Claude Code on your QNX target.
 
-1. Open the project and read its `README.md`:
+1. Open the project's [`README.md`](https://github.com/qnx/claude-code-qnx).
 
-    [github.com/qnx/claude-code-qnx](https://github.com/qnx/claude-code-qnx)
-
-2. Follow the README's set up instructions on your QNX target. At a high level, it has you clone the project, extract the Claude Code JavaScript bundle, install the launcher's dependencies, and put the `claude-qnx` launcher on your `PATH`. In the linked [`INSTALL.md`](https://github.com/qnx/claude-code-qnx/blob/main/INSTALL.md), use the following command for **Step 2: Extract the JavaScript bundle**, in place of `node extract.js --latest`:
+2. Follow the README's set up instructions in the linked [`INSTALL.md`](https://github.com/qnx/claude-code-qnx/blob/main/INSTALL.md). For **Step 2: Extract the JavaScript bundle**, use the following command in place of `node extract.js --latest`:
 
     ```bash
     cd /usr/lib/claude-code
     node extract.js --version 2.1.196
     ```
 
-    Terrence Ang [reported on September 10, 2026](https://github.com/qnx/codelabs/pull/48#discussion_r3982211241) that extraction with `--latest` failed and version `2.1.196` worked. Use this reported working version for this codelab; compatibility with newer versions has not been verified here. Then continue with the installation guide's remaining steps. Use the same pinned version if you need to repeat extraction during troubleshooting.
+    Continue with the installation guide's remaining steps. If you repeat extraction during troubleshooting, use version `2.1.196` again.
 
 3. When you finish, confirm the launcher runs:
     ```bash
