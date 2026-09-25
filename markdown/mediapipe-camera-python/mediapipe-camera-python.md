@@ -36,12 +36,12 @@ The data path has four parts:
    sample. It uses event mode, validates the native buffer ABI and returned format, and bounds
    each frame wait with the documented QNX pulse timeout APIs. Other Camera Library formats and
    capabilities are outside this codelab.
-2. OpenCV converts NV12 to RGB and draws the face boxes and keypoints.
+2. OpenCV converts NV12 to RGB and draws face boxes. The live demo also draws facial keypoints.
 3. MediaPipe Tasks runs the BlazeFace short-range face detector. MediaPipe is the perception
    layer; it does not open the camera on this target.
 4. PySDL2 sends the annotated RGB frames to SDL's exact `opengles2` renderer through QNX
-   Screen. The demo verifies that the selected OpenGL ES renderer is Broadcom V3D and will not
-   silently fall back to software.
+   Screen. The demo checks the renderer name and acceleration flag, then prints the GPU
+   identity for you to verify. It does not silently fall back to SDL's software renderer.
 
 ---
 
@@ -207,8 +207,8 @@ scp <TARGET_USER>@<TARGET_IP>:~/mediapipe-camera-python/annotated_face.png .
 ```
 
 Open `annotated_face.png` on your development computer. Detected faces should have a green
-bounding box and facial keypoints. If there are no annotations, place a face closer to the
-camera and repeat the capture.
+bounding box. If there are no annotations, place a face closer to the camera and repeat
+the capture.
 
 ---
 
@@ -231,9 +231,9 @@ GLES vendor='Broadcom' renderer='V3D ...' version='OpenGL ES ...'
 window+renderer+texture created (1152x648), video_driver=qnx renderer=opengles2
 ```
 
-Those checks establish that this run selected SDL's accelerated OpenGL ES path on the Broadcom
-V3D driver. Requesting an accelerated flag alone would not be enough, so the demo fails if the
-renderer name, acceleration flag, or V3D identity does not match.
+The demo fails if the selected renderer name or acceleration flag does not match. It prints
+the GLES vendor and renderer without checking their values. Confirm that they identify
+Broadcom and V3D before treating the run as hardware-accelerated on this Pi.
 
 While it runs, the window shows the camera image with face boxes and keypoints. The terminal
 reports face counts, end-to-end FPS, process CPU use, and per-stage timing. On a normal stop it
@@ -266,10 +266,11 @@ The helper bounds each frame wait and reports a `TimeoutError` instead of hangin
 QNX Sensor Framework service is running, then stop any other
 application that has the selected camera unit open and try again.
 
-### `opengles2` or V3D verification fails
+### `opengles2` setup fails or the GLES output does not identify V3D
 
-The demo will not hide the failure with a software fallback. Confirm that QNX Screen is running
-with the Raspberry Pi graphics stack and that the image provides `libEGL.so.1`,
+If the demo rejects the SDL renderer or the printed GLES identity is not Broadcom V3D,
+confirm that QNX Screen is running with the Raspberry Pi graphics stack and that the image
+provides `libEGL.so.1`,
 `libGLESv2.so.1`, and the V3D driver. You can isolate display performance with the explicit
 diagnostic mode:
 
