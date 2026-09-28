@@ -41,11 +41,11 @@ Here is the whole flow at a glance:
 Duration: 2:00
 
 ```bash
-git clone https://github.com/qnx-ports/qnx-agent-skills.git
+git clone https://github.com/qnx/qnx-agent-skills.git
 cd qnx-agent-skills
 ```
 
-The tracked top-level layout on the repository's `initial-import` branch (the default `main` branch is currently empty):
+The tracked top-level layout on the repository's `main` branch:
 
 ```
 .agents/                contains skills -> ../skills for skills-capable agents
